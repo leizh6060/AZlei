@@ -4,3 +4,16 @@ $PasswordProfile = @{
   Password = 'ps3'
   }
 New-MgUser -DisplayName 'Lei3 Zhu3' -PasswordProfile $PasswordProfile -AccountEnabled -MailNickName 'lei3zhu3' -UserPrincipalName 'lei3zhu3@leizh6060yahoo.onmicrosoft.com'
+
+#get group
+Connect-MgGraph -TenantId "46a9f217-f68a-4955-af3d-37c7e373638d" -Scopes "Group.Read.All"
+Get-EntraGroup
+#create new group
+Connect-MgGraph -TenantId "46a9f217-f68a-4955-af3d-37c7e373638d" -Scopes "Group.ReadWrite.All"
+$groupParams = @{
+    DisplayName = 'Group from entra ps'
+    MailEnabled = $false
+    SecurityEnabled = $true
+    MailNickName = 'MailNicknameNotSet'
+}
+New-EntraGroup @groupParams
