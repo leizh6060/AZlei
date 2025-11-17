@@ -1,0 +1,54 @@
+Step-by-Step Instructions:
+
+Open PowerShell: Launch your PowerShell command window.
+Install Azure PowerShell Module (if not already installed):
+Install-Module -Name Az -AllowClobber -Scope CurrentUser
+
+Connect to Your Azure Account:
+Connect-AzAccount
+
+Create a Resource Group (if needed):
+New-AzResourceGroup -Name "LeiNov11ResourceGroup" -Location "EastUS"
+
+Create a Storage Account:
+New-AzStorageAccount -ResourceGroupName "LeiNov11ResourceGroup" -Name "leiacct2025" -SkuName "Standard_LRS" -Kind "StorageV2" -location  "EastUS"
+
+Create a Blob Container:
+$context = New-AzStorageContext -StorageAccountName "leiacct2025" -StorageAccountKey (Get-AzStorageAccountKey -ResourceGroupName "LeiNov11ResourceGroup" -Name "leiacct2025")[0].Value
+
+New-AzStorageContainer -Name "leinov11container" -Context $context -PublicAccessType Off ##-publicAccessType not work
+New-AzStorageContainer -Name "leinov11container" -Context $context #works
+Expected Outcome: You will have created a new Azure Blob Storage container named "leinov11container" in your specified storage account.
+
+Project 2: Upload and Download Blobs
+Objective: Practice uploading and downloading blobs to and from your container.
+
+Step-by-Step Instructions:
+
+Upload a Blob:
+Set-AzStorageBlobContent -File "C:\lei\AZ\AZps\principle.txt" -Container "leinov11container" -Blob "principle.txt" -Context $context
+
+Verify the Upload:
+Get-AzStorageBlob -Container "leinov11container" -Context $context
+
+Download a Blob:
+Get-AzStorageBlobContent -Container "leinov11container" -Blob "principle.txt" -Destination "C:\lei\AZ\" -Context $context
+
+Expected Outcome: You will successfully upload a file to your blob container and then download it back to your local machine.
+
+Project 3: Set Access Policies for Blob Containers
+Objective: Learn how to set access policies for your blob containers to control access permissions.
+
+Step-by-Step Instructions:
+
+Create a Stored Access Policy:
+## this NOT work: $policy = New-AzStorageBlobStoredAccessPolicy -Container "leinov11container" -Policy "LeiNov11Policy" -Permission "rwdl" -StartTime (Get-Date) -ExpiryTime (Get-Date).AddDays(7) -Context $context
+$policy =  New-AzStorageContainerStoredAccessPolicy -Container "leinov11container" -Policy "LeiNov11Policy" -Permission "rwdl" -StartTime (Get-Date) -ExpiryTime (Get-Date).AddDays(7) -Context $context
+Generate a Shared Access Signature (SAS):
+$sasToken = New-AzStorageBlobSASToken -Container "leinov11container" -Blob "File.txt" -Permission "r" -ExpiryTime (Get-Date).AddHours(1) -Context $context
+
+Access the Blob Using the SAS Token:
+Use the SAS token to access the blob directly via URL:
+###https://leiacct2025.blob.core.windows.net/leinov11container/File.txt?sasTokenHere
+https://leiacct2025.blob.core.windows.net/leinov11container/principle.txt?$sasToken
+get error PublicAccessNotPermitted
